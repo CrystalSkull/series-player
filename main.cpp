@@ -72,7 +72,7 @@ int main(int argc, char* argv[])
 						{
 							std::string fullPath = getFullPath(parentDir, seasonDir, episodeFile);
 
-							std::string command ( "mpv --fs \"" + fullPath + "\"");
+							std::string command ( "mpv --fs --no-sub \"" + fullPath + "\"");
 
 							int returnValue = system(command.c_str());
 						
