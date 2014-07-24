@@ -252,7 +252,10 @@ void incrementSeason(int seriesNumber, int season)
 }
 void writeVectorToFile(std::vector<std::string>& series)
 {
-	std::ofstream seriesFile ("series", std::fstream::out | std::fstream::trunc);
+	std::string filename (std::getenv("HOME"));
+	filename += "/.series";
+
+	std::ofstream seriesFile (filename, std::fstream::out | std::fstream::trunc);
 
 	if(seriesFile.is_open())
 	{
@@ -278,7 +281,11 @@ std::vector<std::string> getSeries()
 {
 	std::vector<std::string> series;
 	std::string line;
-	std::ifstream seriesFile ("series");
+	
+	std::string filename (std::getenv("HOME"));
+	filename += "/.series";
+
+	std::ifstream seriesFile (filename);
 
 	if(seriesFile.is_open())
 	{
