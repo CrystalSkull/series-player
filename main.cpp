@@ -49,10 +49,10 @@ int main(int argc, char* argv[])
 			printHelp();
 		else
 		{
+			std::string name (argv[1]);
+
 			while(true)
 			{
-				std::string name (argv[1]);
-
 				std::vector<std::string> series = getSeries();
 
 				if(seriesExists(name, series))
@@ -82,7 +82,6 @@ int main(int argc, char* argv[])
 							}
 							else
 							{
-								//TODO ask if we want to increment the episode
 								std::cout << "There was a problem playing this file" << std::endl;
 								std::cout << "Would you like to increment the episode number? (y/n)" << std::endl;
 								char c;
@@ -95,7 +94,6 @@ int main(int argc, char* argv[])
 						}
 						else
 						{
-							//TODO ask if we want to increment the season
 							std::cout << "Could not find episode number " << episode << std::endl;
 							std::cout << "Would you like to increment the season number? (y/n)" << std::endl;
 							char c;
@@ -109,7 +107,6 @@ int main(int argc, char* argv[])
 					}
 					else
 					{
-						//TODO ask if we want to increment the season
 						std::cout << "Could not find season number " << season << std::endl;
 
 						std::cout << "Would you like to increment the season number? (y/n)" << std::endl;
@@ -124,6 +121,8 @@ int main(int argc, char* argv[])
 				else
 				{
 					std::cout << "You have not specified this series" << std::endl;
+					printHelp();
+					break;
 				}
 			}
 		}
