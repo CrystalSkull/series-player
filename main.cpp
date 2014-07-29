@@ -132,7 +132,7 @@ int main(int argc, char* argv[])
 		std::string name = getInputName(argc, argv);
 		std::string path = getInputPath(argc, argv);
 		std::string season = getInputSeason(argc, argv);
-		std::string episode = getInputSeason(argc, argv);
+		std::string episode = getInputEpisode(argc, argv);
 		
 		//if they have not entered the required fields
 		if(name.empty() || path.empty())
