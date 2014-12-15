@@ -195,7 +195,7 @@ std::string getSeasonDir(std::string path, int seasonNumber)
 			//get the name a directory
 			std::string innerDir (ent->d_name);
 			//x amount of characters and then either a whitespace or dot
-			std::string rgx (".*(\\s|\\.|s|S)0?");
+			std::string rgx (".*(\\s|\\.|s|S)0?.*");
 			//the season number
 			rgx += std::to_string(seasonNumber);
 			//optionally a whitespace or dot and then x amount of characters
