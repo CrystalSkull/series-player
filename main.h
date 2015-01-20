@@ -1,8 +1,7 @@
 #include <iostream>
 #include <sstream>
 #include <algorithm>
-#include "boost/filesystem/operations.hpp"
-#include "boost/filesystem/path.hpp"
+#include <boost/filesystem.hpp>
 
 //efficient thanks to move operations
 std::vector<std::string> getArguments(int, char*[]);

@@ -1,7 +1,11 @@
+#include <iostream>
 #include <string>
+#include <boost/filesystem.hpp>
+#include <boost/filesystem/fstream.hpp>
 
 class Series {
 public:
+	enum class field {name, path, season, episode};
 	Series(){};
 	Series(std::string n, std::string p, int s, int e) :
 		name(n),
@@ -23,19 +27,26 @@ public:
 	}
 
 	void setName(std::string);
+	void setPath(boost::filesystem::path);
 	void setPath(std::string);
 	void setSeason(int);
 	void setEpisode(int);
 	
 	std::string getName();
-	std::string getPath();
+	boost::filesystem::path getPath();
 	int getSeason();
 	int getEpisode();
 
 	void incrementSeason();
 	void incrementEpisode();
 
+	void addSeriesToFile(boost::filesystem::path);
+	//apparently the easiest way to handle the files is to read all of it into memory and then rewrite
+	void updateSeriesFile(boost::filesystem::path, std::string, field);
 private:
-	std::string name, path;
+	std::string name;
+	boost::filesystem::path path;
 	int season, episode;
+
+	std::string fieldName(field);
 };

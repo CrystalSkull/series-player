@@ -4,6 +4,8 @@
 using namespace std;
 namespace fs = boost::filesystem;
 
+const fs::path DEFAULT_PATH(string(getenv("HOME")) + "/.seriesTest");
+
 int main(int argc, char *argv[]) {
 	Series se;
 	//either we want to show the help or view the latest series...?
@@ -24,6 +26,8 @@ int main(int argc, char *argv[]) {
 			if(isFlag("--episode", args))
 				stringstream(getFlag("--episode", args)) >> episode;
 			se = Series(name, path, season, episode);
+			//se.addSeriesToFile(DEFAULT_PATH);
+			se.updateSeriesFile(DEFAULT_PATH, "newPath", Series::field::path);
 		}
 	}
 	return 0;
