@@ -7,15 +7,20 @@ namespace fs = boost::filesystem;
 const fs::path DEFAULT_PATH(string(getenv("HOME")) + "/.seriesTest");
 
 int main(int argc, char *argv[]) {
-	Series se;
 	//either we want to show the help or view the latest series...?
 	if(argc == 1) {
 	}
-	else {	
+	else if(argc == 2) {	
 		vector<string> args = getArguments(argc, argv);
 		if(isFlag("--help", args))
 			printHelp();
-		else if(isFlag("--new", args)) {
+		else {
+			string name(args[1]);
+		}
+	}
+	else {	
+		vector<string> args = getArguments(argc, argv);
+		if(isFlag("--new", args)) {
 			string name = getFlag("--new", args);
 			string path = getFlag("--path", args);
 			int season = 1, episode = 1;
@@ -25,9 +30,8 @@ int main(int argc, char *argv[]) {
 				stringstream(getFlag("--season", args)) >> season;
 			if(isFlag("--episode", args))
 				stringstream(getFlag("--episode", args)) >> episode;
-			se = Series(name, path, season, episode);
-			//se.addSeriesToFile(DEFAULT_PATH);
-			se.updateSeriesFile(DEFAULT_PATH, "newPath", Series::field::path);
+			Series s(name, path, season, episode);
+			s.addSeriesToFile(DEFAULT_PATH);
 		}
 	}
 	return 0;
@@ -52,5 +56,5 @@ string getFlag(string flag, const vector<string>& v) {
 
 void printHelp() {
 	//TODO
-	cout << "You requested help, should probably show you how you're supposed to use the program here" << std::endl;
+	cout << "You requested help, should probably show you how you're supposed to use the program here" << endl;
 }

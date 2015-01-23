@@ -28,7 +28,7 @@ public:
 
 	void setName(std::string);
 	void setPath(boost::filesystem::path);
-	void setPath(std::string);
+	//void setPath(std::string);
 	void setSeason(int);
 	void setEpisode(int);
 	
@@ -42,7 +42,7 @@ public:
 
 	void addSeriesToFile(boost::filesystem::path);
 	//apparently the easiest way to handle the files is to read all of it into memory and then rewrite
-	void updateSeriesFile(boost::filesystem::path, std::string, field);
+	void updateSeriesFile(boost::filesystem::path);
 private:
 	std::string name;
 	boost::filesystem::path path;

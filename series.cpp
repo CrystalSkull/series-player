@@ -7,9 +7,9 @@ namespace fs = boost::filesystem;
 void Series::setName(string n) {
 	name = n;
 }	
-void Series::setPath(string p) {
+/*void Series::setPath(string p) {
 	path = p;
-}
+}*/
 void Series::setPath(fs::path p) {
 	path = p;
 }
@@ -45,26 +45,47 @@ void Series::addSeriesToFile(fs::path p) {
 	//we want a starting new line if the file exists
 	fs << start;
 	fs << "name=" << name << "\n";
-	fs << "path=" << path << "\n";
+	//string() to get rid of the quotation marks
+	fs << "path=" << path.string() << "\n";
 	fs << "season=" << season << "\n";
 	fs << "episode=" << episode << flush;
 	fs.close();
 }
-void Series::updateSeriesFile(fs::path p, string s, Series::field f) {
-	fs::fstream fs(s, fs::fstream::out | fs::fstream::in);
+void Series::updateSeriesFile(fs::path p) {
+	fs::ifstream ifstream(p);
 	string line;
 	vector<string> lines;
-	while(fs >> line) {
+	while(ifstream && !ifstream.eof()) {
+		ifstream >> line;
 		//make sure it's the correct series we're editing
-		if(line == (fieldName(f) + "=" + name)) {
-			//TODO edit the correct field here
-			lines.push_back(fieldName(f) + name);
+		if(line == ("name=" + name)) {
+			string s("name=");
+			s += name;
+			lines.push_back(s);
+			s = "path=";
+			s += path.string();
+			lines.push_back(s);
+			s = "season=";
+			s += to_string(season);
+			lines.push_back(s);
+			s = "episode=";
+			s += to_string(episode);
+			lines.push_back(s);
+			//let's just read the rest of the information about this
+			for(int i = 0; i < 4; i++)
+				ifstream >> line;
 		}
 		else
 			lines.push_back(line);
 	}
-	while(fs << line);
-	fs.close();
+
+	fs::ofstream ofstream(p, fs::fstream::out | fs::fstream::trunc);
+	for(string a : lines) {
+		if(!ofstream)
+			cout << "something wrong with stream\n";
+		ofstream << a << "\n";
+	}
+	ofstream.close();
 }
 string Series::fieldName(Series::field f) {
 	switch(f) {
