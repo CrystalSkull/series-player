@@ -16,6 +16,12 @@ int main(int argc, char *argv[]) {
 			printHelp();
 		else {
 			string name(args[1]);
+			series s(name, DEFAULT_PATH);
+			thread(getInput);
+			while(true) {
+				fs::path p = s.getNextEpisode();
+				thread(viewFile, p);
+			}
 		}
 	}
 	else {	
@@ -30,7 +36,7 @@ int main(int argc, char *argv[]) {
 				stringstream(getFlag("--season", args)) >> season;
 			if(isFlag("--episode", args))
 				stringstream(getFlag("--episode", args)) >> episode;
-			Series s(name, path, season, episode);
+			series s(name, path, season, episode);
 			s.addSeriesToFile(DEFAULT_PATH);
 		}
 	}
@@ -57,4 +63,16 @@ string getFlag(string flag, const vector<string>& v) {
 void printHelp() {
 	//TODO
 	cout << "You requested help, should probably show you how you're supposed to use the program here" << endl;
+}
+void viewFile(fs::path p) {
+	string command("mpv --fs --no-sub \"");
+	command += p.string();
+	command += "\"";
+	system(command.c_str());
+}
+void getInput() {
+	string input;
+	while(cin && cin >> input)
+		if(input == "q")
+			exit(0);
 }

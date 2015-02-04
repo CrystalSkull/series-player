@@ -4,40 +4,39 @@ using namespace std;
 namespace fs = boost::filesystem;
 
 //public
-void Series::setName(string n) {
+void series::setName(string n) {
 	name = n;
 }	
-/*void Series::setPath(string p) {
-	path = p;
-}*/
-void Series::setPath(fs::path p) {
+void series::setPath(fs::path p) {
 	path = p;
 }
-void Series::setSeason(int s) {
+void series::setSeason(int s) {
 	season = s;
+	//if we've updated the season, we might as well update the path to the new season
+	setSeasonPath();
 }
-void Series::setEpisode(int e) {
+void series::setEpisode(int e) {
 	episode = e;
 }
-string Series::getName() {
+string series::getName() {
 	return name;
 }
-boost::filesystem::path Series::getPath() {
+boost::filesystem::path series::getPath() {
 	return path;
 }
-int Series::getSeason() {
+int series::getSeason() {
 	return season;
 }
-int Series::getEpisode() {
+int series::getEpisode() {
 	return episode;
 }
-void Series::incrementSeason() {
+void series::incrementSeason() {
 	++season;
 }
-void Series::incrementEpisode() {
+void series::incrementEpisode() {
 	++episode;
 }
-void Series::addSeriesToFile(fs::path p) {
+void series::addSeriesToFile(fs::path p) {
 	string start;
 	if(fs::exists(p))
 		start = "\n\n";
@@ -51,7 +50,7 @@ void Series::addSeriesToFile(fs::path p) {
 	fs << "episode=" << episode << flush;
 	fs.close();
 }
-void Series::updateSeriesFile(fs::path p) {
+void series::updateSeriesFile(fs::path p) {
 	fs::ifstream ifstream(p);
 	string line;
 	vector<string> lines;
@@ -87,17 +86,66 @@ void Series::updateSeriesFile(fs::path p) {
 	}
 	ofstream.close();
 }
-string Series::fieldName(Series::field f) {
+string series::fieldName(series::field f) {
 	switch(f) {
-	case Series::field::name:
+	case series::field::name:
 		return "name";
-	case Series::field::path:
+	case series::field::path:
 		return "path";
-	case Series::field::season:
+	case series::field::season:
 		return "season";
-	case Series::field::episode:
+	case series::field::episode:
 		return "episode";
 	default:
 		return "invalid field";
 	}
+}
+void series::populateFields(fs::path seriesFile) {
+	fs::ifstream ifs(seriesFile);
+	string line;
+	while(ifs && !ifs.eof()) {
+		if(line == ("name=" + name)) {
+			string temp;
+			ifs >> temp;
+			path = temp.substr(temp.find("=") + 1);
+			ifs >> temp;
+			season = atoi(temp.substr(temp.find("=") + 1).c_str());
+			ifs >> temp;
+			episode = atoi(temp.substr(temp.find("=") + 1).c_str());
+			ifs.close();
+			return;
+		}
+		ifs >> line;
+	}
+}
+fs::path series::getNextEpisode() {
+	if(seasonPath == "")
+		setSeasonPath();
+
+	string rgxString(R"(*(\s|\.|-|_))" + to_string(episode) + R"((\s|\.|-|_)*.)");
+	rgxString += "(";
+	unsigned int count = 0;
+	for(string type : validTypes) {
+		++count;
+		rgxString += type;
+		if(count != validTypes.size())
+			rgxString += "|";
+	}
+	rgxString += ")";
+
+	return getPathFromRegex(seasonPath, rgxString);
+}	
+void series::setSeasonPath() {
+	fs::path p = getPathFromRegex(path, R"(*(season|Season|s|S).*)" + to_string(season));
+	//if we found no result, lets assume that we're watching an anime or something that has no seasons
+	//so let's use the current path as the wanted season directory
+	seasonPath = p == "" ? path : p;
+}
+fs::path series::getPathFromRegex(fs::path p, string regexString) {
+	regex rgx(regexString);
+	fs::directory_iterator dirIt(p);
+	for(fs::directory_entry file : dirIt)
+		if(regex_search(file.path().string(), rgx))
+				return file.path();
+	return fs::path();
 }
