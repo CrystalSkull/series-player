@@ -12,8 +12,7 @@ void series::setPath(fs::path p) {
 }
 void series::setSeason(int s) {
 	season = s;
-	//if we've updated the season, we might as well update the path to the new season
-	setSeasonPath();
+	//if we've updated the season, we might as well update the path to the new season setSeasonPath();
 }
 void series::setEpisode(int e) {
 	episode = e;
@@ -56,7 +55,7 @@ void series::updateSeriesFile() {
 	string line;
 	vector<string> lines;
 	while(ifstream && !ifstream.eof()) {
-		ifstream >> line;
+		getline(ifstream, line);
 		//make sure it's the correct series we're editing
 		if(line == ("name=" + name)) {
 			string s("name=");
@@ -72,8 +71,8 @@ void series::updateSeriesFile() {
 			s += to_string(episode);
 			lines.push_back(s);
 			//let's just read the rest of the information about this
-			for(int i = 0; i < 4; i++)
-				ifstream >> line;
+			for(int i = 0; i < 4; i++)				
+				getline(ifstream, line);
 		}
 		else
 			lines.push_back(line);
