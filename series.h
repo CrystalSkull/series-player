@@ -51,7 +51,7 @@ private:
 	std::string name;
 	boost::filesystem::path path = "", seasonPath = "";
 	int season, episode;
-	const boost::filesystem::path SERIES_FILE = std::string(std::getenv("HOME")) + "/.seriesTest";
+	const boost::filesystem::path SERIES_FILE = std::string(std::getenv("HOME")) + "/.series";
 
 	std::string fieldName(field);
 	void populateFields();
