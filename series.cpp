@@ -32,15 +32,17 @@ int series::getEpisode() {
 }
 void series::incrementSeason() {
 	++season;
+	updateSeriesFile();
 }
 void series::incrementEpisode() {
 	++episode;
+	updateSeriesFile();
 }
-void series::addSeriesToFile(fs::path p) {
+void series::addSeriesToFile() {
 	string start;
-	if(fs::exists(p))
-		start = "\n\n";
-	fs::ofstream fs(p, fs::fstream::out | fs::fstream::app);
+	if(fs::exists(SERIES_FILE))
+		start = "\n";
+	fs::ofstream fs(SERIES_FILE, fs::fstream::out | fs::fstream::app);
 	//we want a starting new line if the file exists
 	fs << start;
 	fs << "name=" << name << "\n";
@@ -48,10 +50,9 @@ void series::addSeriesToFile(fs::path p) {
 	fs << "path=" << path.string() << "\n";
 	fs << "season=" << season << "\n";
 	fs << "episode=" << episode << flush;
-	fs.close();
 }
-void series::updateSeriesFile(fs::path p) {
-	fs::ifstream ifstream(p);
+void series::updateSeriesFile() {
+	fs::ifstream ifstream(SERIES_FILE);
 	string line;
 	vector<string> lines;
 	while(ifstream && !ifstream.eof()) {
@@ -78,7 +79,7 @@ void series::updateSeriesFile(fs::path p) {
 			lines.push_back(line);
 	}
 
-	fs::ofstream ofstream(p, fs::fstream::out | fs::fstream::trunc);
+	fs::ofstream ofstream(SERIES_FILE, fs::fstream::out | fs::fstream::trunc);
 	for(string a : lines) {
 		if(!ofstream)
 			cout << "something wrong with stream\n";
@@ -100,18 +101,21 @@ string series::fieldName(series::field f) {
 		return "invalid field";
 	}
 }
-void series::populateFields(fs::path seriesFile) {
-	fs::ifstream ifs(seriesFile);
+void series::populateFields() {
+	fs::ifstream ifs(SERIES_FILE);
 	string line;
 	while(ifs && !ifs.eof()) {
 		if(line == ("name=" + name)) {
 			string temp;
-			ifs >> temp;
+			//it seems the first getline will just "clear" the previous line
+			//the reason we use this is because of the possibility of white spaces in path
+			getline(ifs, temp);
+			getline(ifs, temp);
 			path = temp.substr(temp.find("=") + 1);
 			ifs >> temp;
-			season = atoi(temp.substr(temp.find("=") + 1).c_str());
+			season = stoi(temp.substr(temp.find("=") + 1));
 			ifs >> temp;
-			episode = atoi(temp.substr(temp.find("=") + 1).c_str());
+			episode = stoi(temp.substr(temp.find("=") + 1));
 			ifs.close();
 			return;
 		}
@@ -122,7 +126,7 @@ fs::path series::getNextEpisode() {
 	if(seasonPath == "")
 		setSeasonPath();
 
-	string rgxString(R"(*(\s|\.|-|_))" + to_string(episode) + R"((\s|\.|-|_)*.)");
+	string rgxString(R"(.*(\s|\.|-|_|e|episode)0?)" + to_string(episode) + R"(\D+.*\.)");
 	rgxString += "(";
 	unsigned int count = 0;
 	for(string type : validTypes) {
@@ -133,19 +137,22 @@ fs::path series::getNextEpisode() {
 	}
 	rgxString += ")";
 
-	return getPathFromRegex(seasonPath, rgxString);
+	return getPathFromRegex(seasonPath, rgxString, fs::file_type::regular_file);
 }	
 void series::setSeasonPath() {
-	fs::path p = getPathFromRegex(path, R"(*(season|Season|s|S).*)" + to_string(season));
+	fs::path p = getPathFromRegex(path, R"(.*(season|s).*)" + to_string(season) + R"(\D+.*)", fs::file_type::directory_file);
 	//if we found no result, lets assume that we're watching an anime or something that has no seasons
 	//so let's use the current path as the wanted season directory
 	seasonPath = p == "" ? path : p;
 }
-fs::path series::getPathFromRegex(fs::path p, string regexString) {
-	regex rgx(regexString);
+//also give the wanted filetype (directory or regular file)
+fs::path series::getPathFromRegex(fs::path p, string regexString, fs::file_type type) {
+	regexString = string("/") + regexString + "$";
+	//ignore case
+	regex rgx(regexString, regex_constants::icase);
 	fs::directory_iterator dirIt(p);
 	for(fs::directory_entry file : dirIt)
-		if(regex_search(file.path().string(), rgx))
+		if(regex_search(file.path().string(), rgx) && file.status().type() == type)
 				return file.path();
 	return fs::path();
 }

@@ -4,8 +4,6 @@
 using namespace std;
 namespace fs = boost::filesystem;
 
-const fs::path DEFAULT_PATH(string(getenv("HOME")) + "/.seriesTest");
-
 int main(int argc, char *argv[]) {
 	//either we want to show the help or view the latest series...?
 	if(argc == 1) {
@@ -15,12 +13,27 @@ int main(int argc, char *argv[]) {
 		if(isFlag("--help", args))
 			printHelp();
 		else {
-			string name(args[1]);
-			series s(name, DEFAULT_PATH);
-			thread(getInput);
+			string name(args[0]);
+			series s(name);
+			//TODO
+			//doesn't work at the moment, no idea why
+			//thread(getInput);
+			fs::path episodePath;
 			while(true) {
-				fs::path p = s.getNextEpisode();
-				thread(viewFile, p);
+				while((episodePath = s.getNextEpisode()) != "") {
+					if(!playFile(episodePath))
+						break;
+					s.incrementEpisode();
+				}
+				cout << "Could not find episodefile";
+				cout << "\nWould you like to look for the next season?";
+				string answer;
+				if(cin && cin >> answer) {
+					if(answer == "y")
+						s.incrementSeason();
+					else
+						break;
+				}
 			}
 		}
 	}
@@ -33,11 +46,11 @@ int main(int argc, char *argv[]) {
 			//TODO
 			//probably shouldnt assume that the user gives a valid int, but let's not care
 			if(isFlag("--season", args))
-				stringstream(getFlag("--season", args)) >> season;
+				season = stoi(getFlag("--season", args));
 			if(isFlag("--episode", args))
-				stringstream(getFlag("--episode", args)) >> episode;
+				episode = stoi(getFlag("--episode", args));
 			series s(name, path, season, episode);
-			s.addSeriesToFile(DEFAULT_PATH);
+			s.addSeriesToFile();
 		}
 	}
 	return 0;
@@ -64,15 +77,19 @@ void printHelp() {
 	//TODO
 	cout << "You requested help, should probably show you how you're supposed to use the program here" << endl;
 }
-void viewFile(fs::path p) {
-	string command("mpv --fs --no-sub \"");
+bool playFile(fs::path p) {
+	string command("urxvt -e mpv --fs --no-sub \"");
 	command += p.string();
 	command += "\"";
-	system(command.c_str());
+	//returns 0 when successfully executing
+	return !system(command.c_str());
 }
 void getInput() {
+	cout << "trying to get input";
 	string input;
-	while(cin && cin >> input)
+	while(true) {
+		cin >> input;
 		if(input == "q")
 			exit(0);
+	}
 }
