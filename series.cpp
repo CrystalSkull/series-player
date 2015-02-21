@@ -127,17 +127,35 @@ fs::path series::getNextEpisode() {
 		setSeasonPath();
 
 	string rgxString(R"(.*(episode|e|_|-|\.|\s)0?)" + to_string(episode) + R"(\D+.*\.)");
-	rgxString += "(";
+	string rgxStringWithType(rgxString);
+	rgxStringWithType += "(";
 	unsigned int count = 0;
 	for(string type : validTypes) {
 		++count;
-		rgxString += type;
+		rgxStringWithType += type;
 		if(count != validTypes.size())
-			rgxString += "|";
+			rgxStringWithType += "|";
 	}
-	rgxString += ")";
+	rgxStringWithType += ")";
+//	rgxString = string("/") + rgxString + "$";
+	rgxStringWithType = string("/") + rgxStringWithType + "$";
+	regex rgx(rgxString, regex_constants::icase);
+	regex rgxWithType(rgxStringWithType, regex_constants::icase);
 
-	return getPathFromRegex(seasonPath, rgxString, fs::file_type::regular_file);
+	fs::directory_iterator dirIt(seasonPath);
+	for(auto file : dirIt) {
+		if(regex_search(file.path().string(), rgxWithType) && file.status().type() == fs::file_type::regular_file)
+			return file.path();
+		else if(regex_search(file.path().string(), rgx)) {
+			fs::directory_iterator dirItEp(file.path());
+			for(auto epFile : dirItEp) {
+				if(regex_search(epFile.path().string(), rgxWithType) && epFile.status().type() == fs::file_type::regular_file) {
+					return epFile.path();
+				}
+			}	
+		}
+	}
+	return fs::path();
 }	
 void series::setSeasonPath() {
 	fs::path p = getPathFromRegex(path, R"(.*(season|s).*)" + to_string(season) + R"((\D+.*)?)", fs::file_type::directory_file);
