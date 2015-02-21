@@ -28,7 +28,7 @@ int main(int argc, char *argv[]) {
 				cout << "Could not find episodefile";
 				cout << "\nWould you like to look for the next season?";
 				string answer;
-				if(cin && cin >> answer) {
+				if(getline(cin, answer)) {
 					if(answer == "y")
 						s.incrementSeason();
 					else

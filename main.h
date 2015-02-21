@@ -3,6 +3,7 @@
 #include <iostream>
 #include <sstream>
 #include <algorithm>
+#include <string>
 #include <boost/filesystem.hpp>
 
 //efficient thanks to move operations
