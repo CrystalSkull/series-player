@@ -31,6 +31,7 @@ int series::getEpisode() {
 }
 void series::incrementSeason() {
 	++season;
+	episode = 1;
 	updateSeriesFile();
 }
 void series::incrementEpisode() {
@@ -125,7 +126,7 @@ fs::path series::getNextEpisode() {
 	if(seasonPath == "")
 		setSeasonPath();
 
-	string rgxString(R"(.*(\s|\.|-|_|e|episode)0?)" + to_string(episode) + R"(\D+.*\.)");
+	string rgxString(R"(.*(episode|e|_|-|\.|\s)0?)" + to_string(episode) + R"(\D+.*\.)");
 	rgxString += "(";
 	unsigned int count = 0;
 	for(string type : validTypes) {
@@ -139,7 +140,7 @@ fs::path series::getNextEpisode() {
 	return getPathFromRegex(seasonPath, rgxString, fs::file_type::regular_file);
 }	
 void series::setSeasonPath() {
-	fs::path p = getPathFromRegex(path, R"(.*(season|s).*)" + to_string(season) + R"(\D+.*)", fs::file_type::directory_file);
+	fs::path p = getPathFromRegex(path, R"(.*(season|s).*)" + to_string(season) + R"((\D+.*)?)", fs::file_type::directory_file);
 	//if we found no result, lets assume that we're watching an anime or something that has no seasons
 	//so let's use the current path as the wanted season directory
 	seasonPath = p == "" ? path : p;
