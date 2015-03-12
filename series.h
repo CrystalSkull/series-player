@@ -15,19 +15,6 @@ public:
 		path(p),
 		season(s),
 		episode(e){}
-	series(series&& s): 
-		name(std::move(s.name)),
-		path(std::move(s.path)),
-		season(std::move(season)),
-		episode(std::move(episode)){}
-
-	series& operator=(series&& s) {
-		name = std::move(s.name);
-		path = std::move(s.path);
-		season = std::move(s.season);
-		episode = std::move(s.episode);
-		return *this;
-	}
 
 	void setName(std::string);
 	void setPath(boost::filesystem::path);
