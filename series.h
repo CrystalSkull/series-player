@@ -1,10 +1,3 @@
-#include <iostream>
-#include <cstdlib>
-#include <regex>
-#include <string>
-#include <boost/filesystem.hpp>
-#include <boost/filesystem/fstream.hpp>
-
 class series {
 public:
 	enum class field {name, path, season, episode};

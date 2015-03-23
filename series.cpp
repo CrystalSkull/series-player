@@ -1,3 +1,9 @@
+#include <iostream>
+#include <cstdlib>
+#include <regex>
+#include <string>
+#include <boost/filesystem.hpp>
+#include <boost/filesystem/fstream.hpp>
 #include "series.h"
 
 using namespace std;

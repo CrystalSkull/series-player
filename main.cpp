@@ -1,3 +1,11 @@
+#include <cstdlib>
+#include <thread>
+#include <iostream>
+#include <sstream>
+#include <algorithm>
+#include <string>
+#include <boost/filesystem.hpp>
+
 #include "main.h"
 #include "series.h" 
 
@@ -78,7 +86,7 @@ void printHelp() {
 	cout << "You requested help, should probably show you how you're supposed to use the program here" << endl;
 }
 bool playFile(fs::path p) {
-	string command("urxvt -e mpv --fs --no-sub \"");
+	string command("urxvt -e mpv --fs \"");
 	command += p.string();
 	command += "\"";
 	//returns 0 when successfully executing
